@@ -52,26 +52,18 @@ namespace ServerSample
             _mqttServer = _mqttFactory.CreateMqttServer();
 
             // 客户端连接
-            _mqttServer.UseClientConnectedHandler(arg =>
+            _mqttServer.UseClientConnectedHandler(arg => 
             {
                 _logger.LogInformation($"\n\n{arg.ClientId} 已连接\n\n");
             });
             // 客户端断开
             _mqttServer.UseClientDisconnectedHandler(arg =>
             {
-                _logger.LogInformation($"\n\n{arg.ClientId} 已断开, 类型为: {arg.DisconnectType}\n\n");
+                _logger.LogInformation($"\n\n{arg.ClientId} 已断开, 断开类型: {arg.DisconnectType}\n\n");
             });
             // 接收客户端发来的消息
-            _mqttServer.UseApplicationMessageReceivedHandler(arg =>
+            _mqttServer.UseApplicationMessageReceivedHandler(arg => 
             {
-                //Console.WriteLine("\n\n");
-                //_logger.LogInformation("===Server===");
-                //_logger.LogInformation($"接收来自 [{arg.ClientId}] 消息");
-                //_logger.LogInformation($"主题 [{arg.ApplicationMessage.Topic}]");
-                //_logger.LogInformation($"回复主题 [{arg.ApplicationMessage.ResponseTopic}]");
-                //_logger.LogInformation($"消息: {Encoding.UTF8.GetString(arg.ApplicationMessage.Payload)}");
-                //Console.WriteLine("\n\n");
-
                 StringBuilder message = new StringBuilder();
                 message.AppendLine($"\n\n===Server===");
                 message.AppendLine($"接收来自 [{arg.ClientId}] 消息");
@@ -80,22 +72,11 @@ namespace ServerSample
                 message.Append($"\n\n");
                 _logger.LogInformation(message.ToString());
 
-                //if (string.IsNullOrWhiteSpace(arg.ApplicationMessage.ResponseTopic) == false)
-                //{
-                //    _mqttServer.PublishAsync(new MqttApplicationMessage 
-                //    {
-                //        Topic = arg.ApplicationMessage.ResponseTopic,
-                //        Payload = arg.ApplicationMessage.Payload,
-                //        QualityOfServiceLevel = arg.ApplicationMessage.QualityOfServiceLevel,
-                //        ResponseTopic = arg.ApplicationMessage.Topic,
-                //        UserProperties = arg.ApplicationMessage.UserProperties
-                //    }, cancellationToken);
-                //}
-
-                arg.ProcessingFailed = false;
-                arg.ReasonCode = MqttApplicationMessageReceivedReasonCode.Success;
-                arg.IsHandled = true;
+                //arg.ProcessingFailed = false;
+                //arg.ReasonCode = MqttApplicationMessageReceivedReasonCode.Success;
+                //arg.IsHandled = true;
             });
+
             await base.StartAsync(cancellationToken);
         }
 

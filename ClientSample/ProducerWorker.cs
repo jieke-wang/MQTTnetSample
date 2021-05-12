@@ -63,9 +63,9 @@ namespace ClientSample
                 if (cancellationToken.IsCancellationRequested || _mqttClient.IsConnected) return;
                 await _mqttClient.ReconnectAsync();
             });
-            _mqttClient.UseConnectedHandler(arg => 
+            _mqttClient.UseConnectedHandler(arg =>
             {
-                _logger.LogInformation($"连接状态: {arg.AuthenticateResult.ResultCode}");
+                _logger.LogInformation($"\n\n连接状态: {arg.AuthenticateResult.ResultCode}\n\n");
             });
 
             _mqttClient.UseApplicationMessageReceivedHandler(arg =>
@@ -109,6 +109,7 @@ namespace ClientSample
                 {
                     //await _mqttClient.PingAsync(stoppingToken);
                     string msg = $"{Environment.ProcessId} {Guid.NewGuid()} {DateTime.Now}";
+
                     Console.WriteLine($"\n\n发送消息: {msg}\n\n");
                     await _mqttClient.PublishAsync(new MqttApplicationMessage
                     {

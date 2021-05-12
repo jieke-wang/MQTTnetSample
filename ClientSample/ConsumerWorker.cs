@@ -110,9 +110,9 @@ namespace ClientSample
                     UserProperties = arg.ApplicationMessage.UserProperties
                 }, cancellationToken);
 
-                arg.ProcessingFailed = false;
-                arg.ReasonCode = MqttApplicationMessageReceivedReasonCode.Success;
-                arg.IsHandled = true;
+                //arg.ProcessingFailed = false;
+                //arg.ReasonCode = MqttApplicationMessageReceivedReasonCode.Success;
+                //arg.IsHandled = true;
             });
 
             await _mqttClient.ConnectAsync(_options, cancellationToken);
