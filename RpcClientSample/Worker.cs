@@ -107,7 +107,7 @@ namespace RpcClientSample
                     _logger.LogInformation($"耗时: {DateTime.Now - startTime}");
 
                     //await Task.Delay(1000, stoppingToken);
-                    await Task.Delay(5000, stoppingToken);
+                    //await Task.Delay(5000, stoppingToken);
                     //await Task.Delay(999999, stoppingToken);
                 }
                 catch (Exception ex)
@@ -136,10 +136,12 @@ namespace RpcClientSample
                 //    RequestTopic = string.Format(requestTopic, context.MethodName),
                 //    ResponseTopic = string.Format(responseTopic, context.MethodName)
                 //};
+
+                string requestTopic = $"MQTTnet.RPC/{appName}-{Guid.NewGuid():n}/{context.MethodName}";
                 return new MqttRpcTopicPair
                 {
-                    RequestTopic = $"MQTTnet.RPC/{appName}/{context.MethodName}",
-                    ResponseTopic = $"MQTTnet.RPC/{appName}/{context.MethodName}/response"
+                    RequestTopic = requestTopic,
+                    ResponseTopic = $"{requestTopic}/response"
                 };
             }
         }
