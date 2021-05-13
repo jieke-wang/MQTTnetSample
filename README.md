@@ -8,6 +8,8 @@ MQTT简单示例
 > https://www.nuget.org/packages/MQTTnet
 >
 > https://www.nuget.org/packages/MQTTnet.Extensions.Rpc/
+>
+> https://www.nuget.org/packages/MQTTnet.AspNetCore/
 
 > MQTT（一）C# 使用 MQTTnet 快速实现 MQTT 通信
 > https://blog.csdn.net/panwen1111/article/details/79245161
@@ -25,10 +27,11 @@ MQTT简单示例
 >
 > https://github.com/chkr1011/MQTTnet/blob/master/Tests/MQTTnet.Core.Tests/RPC_Tests.cs
 >
+> https://github.com/chkr1011/MQTTnet/blob/master/Tests/MQTTnet.TestApp.AspNetCore2/Program.cs
+>
 > https://github.com/chkr1011/MQTTnet/blob/master/Source/MQTTnet.Extensions.Rpc/MqttRpcClient.cs
 >
 > https://github.com/chkr1011/MQTTnet/blob/master/Source/MQTTnet.Extensions.WebSocket4Net/WebSocket4NetMqttChannel.cs
->
 
 ```csharp
 // 构建结果通知结合, key为通知标识, value为结果容器
