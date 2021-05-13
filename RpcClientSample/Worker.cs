@@ -96,15 +96,18 @@ namespace RpcClientSample
                     //Console.WriteLine($"\n\n收到响应: {Encoding.UTF8.GetString(response)}\n\n"); 
                     #endregion
 
+                    DateTime startTime = DateTime.Now;
                     using (IMqttRpcClient rpcClient = new MqttRpcClient(_mqttClient, _mqttRpcClientOptions))
                     {
                         string request = $"{Environment.ProcessId} {Guid.NewGuid()} {DateTime.Now}";
-                        Console.WriteLine($"\n\n发送请求: {request}\n\n");
+                        _logger.LogInformation($"\n\n发送请求: {request}\n\n");
                         byte[] response = await rpcClient.ExecuteAsync(TimeSpan.FromSeconds(100), method, request, MqttQualityOfServiceLevel.ExactlyOnce);
-                        Console.WriteLine($"\n\n收到响应: {Encoding.UTF8.GetString(response)}\n\n");
+                        _logger.LogInformation($"\n\n收到响应: {Encoding.UTF8.GetString(response)}\n\n");
                     }
+                    _logger.LogInformation($"耗时: {DateTime.Now - startTime}");
 
-                    //await Task.Delay(5000, stoppingToken);
+                    //await Task.Delay(1000, stoppingToken);
+                    await Task.Delay(5000, stoppingToken);
                     //await Task.Delay(999999, stoppingToken);
                 }
                 catch (Exception ex)

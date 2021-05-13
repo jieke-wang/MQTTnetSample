@@ -83,36 +83,36 @@ namespace RpcServerSample
             {
                 _logger.LogInformation($"\n\n{arg.ClientId} 已断开, 断开类型: {arg.DisconnectType}\n\n");
             });
-            // 接收客户端发来的消息
-            _mqttServer.UseApplicationMessageReceivedHandler(arg =>
-            {
-                StringBuilder message = new StringBuilder();
-                message.AppendLine($"\n\n===Server===");
-                message.AppendLine($"接收来自 [{arg.ClientId}] 消息");
-                message.AppendLine($"主题 [{arg.ApplicationMessage.Topic}]");
-                message.AppendLine($"消息: {Encoding.UTF8.GetString(arg.ApplicationMessage.Payload)}");
-                message.Append($"\n\n");
-                _logger.LogInformation(message.ToString());
+            // 监控客户端发来的消息
+            //_mqttServer.UseApplicationMessageReceivedHandler(arg =>
+            //{
+            //    StringBuilder message = new StringBuilder();
+            //    message.AppendLine($"\n\n===Server===");
+            //    message.AppendLine($"接收来自 [{arg.ClientId}] 消息");
+            //    message.AppendLine($"主题 [{arg.ApplicationMessage.Topic}]");
+            //    message.AppendLine($"消息: {Encoding.UTF8.GetString(arg.ApplicationMessage.Payload)}");
+            //    message.Append($"\n\n");
+            //    _logger.LogInformation(message.ToString());
 
-                //if (string.IsNullOrWhiteSpace(arg.ApplicationMessage.ResponseTopic) == false)
-                //{
-                //    string payLoad = $"回复: {Encoding.UTF8.GetString(arg.ApplicationMessage.Payload)}";
-                //    await _mqttServer.PublishAsync(new MqttApplicationMessage
-                //    {
-                //        Topic = arg.ApplicationMessage.ResponseTopic,
-                //        Payload = Encoding.UTF8.GetBytes(payLoad),
-                //        QualityOfServiceLevel = MqttQualityOfServiceLevel.AtLeastOnce,
-                //        ResponseTopic = arg.ApplicationMessage.Topic,
-                //        UserProperties = arg.ApplicationMessage.UserProperties,
-                //        SubscriptionIdentifiers = arg.ApplicationMessage.SubscriptionIdentifiers,
-                //        CorrelationData = arg.ApplicationMessage.CorrelationData
-                //    }, cancellationToken);
-                //}
+            //    //if (string.IsNullOrWhiteSpace(arg.ApplicationMessage.ResponseTopic) == false)
+            //    //{
+            //    //    string payLoad = $"回复: {Encoding.UTF8.GetString(arg.ApplicationMessage.Payload)}";
+            //    //    await _mqttServer.PublishAsync(new MqttApplicationMessage
+            //    //    {
+            //    //        Topic = arg.ApplicationMessage.ResponseTopic,
+            //    //        Payload = Encoding.UTF8.GetBytes(payLoad),
+            //    //        QualityOfServiceLevel = MqttQualityOfServiceLevel.AtLeastOnce,
+            //    //        ResponseTopic = arg.ApplicationMessage.Topic,
+            //    //        UserProperties = arg.ApplicationMessage.UserProperties,
+            //    //        SubscriptionIdentifiers = arg.ApplicationMessage.SubscriptionIdentifiers,
+            //    //        CorrelationData = arg.ApplicationMessage.CorrelationData
+            //    //    }, cancellationToken);
+            //    //}
 
-                //arg.ProcessingFailed = false;
-                //arg.ReasonCode = MqttApplicationMessageReceivedReasonCode.Success;
-                //arg.IsHandled = true;
-            });
+            //    //arg.ProcessingFailed = false;
+            //    //arg.ReasonCode = MqttApplicationMessageReceivedReasonCode.Success;
+            //    //arg.IsHandled = true;
+            //});
 
             await base.StartAsync(cancellationToken);
         }
