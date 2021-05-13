@@ -106,7 +106,7 @@ namespace ClientSample
                     Topic = producerTopic,
                     Payload = Encoding.UTF8.GetBytes(payLoad),
                     QualityOfServiceLevel = MqttQualityOfServiceLevel.AtLeastOnce,
-                    ResponseTopic = consumerTopic,
+                    //ResponseTopic = consumerTopic,
                     UserProperties = arg.ApplicationMessage.UserProperties
                 }, cancellationToken);
 

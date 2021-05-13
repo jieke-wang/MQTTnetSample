@@ -116,7 +116,7 @@ namespace ClientSample
                         Topic = consumerTopic,
                         Payload = Encoding.UTF8.GetBytes(msg),
                         QualityOfServiceLevel = MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce,
-                        ResponseTopic = producerTopic,
+                        //ResponseTopic = producerTopic,
                         UserProperties = new List<MqttUserProperty> { _mqttUserProperty }
                     }, stoppingToken);
                 }
