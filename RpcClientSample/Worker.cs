@@ -15,6 +15,7 @@ using MQTTnet.Extensions.Rpc;
 using MQTTnet.Extensions.Rpc.Options;
 using MQTTnet.Extensions.Rpc.Options.TopicGeneration;
 using MQTTnet.Packets;
+using MQTTnet.Protocol;
 
 namespace RpcClientSample
 {
@@ -25,14 +26,16 @@ namespace RpcClientSample
         private readonly IMqttFactory _mqttFactory;
         private IMqttClient _mqttClient;
         private readonly MqttUserProperty _mqttUserProperty;
-        private IMqttRpcClient _mqttRpcClient;
+        //private IMqttRpcClient _mqttRpcClient;
         private readonly IMqttRpcClientOptions _mqttRpcClientOptions;
 
-        const string requestTopic = "originator/destination/{0}/info";
-        const string responseTopic = "destination/originator/{0}/info";
+        //const string requestTopic = "originator/destination/{0}/info";
+        //const string responseTopic = "destination/originator/{0}/info";
         const string username = "jieke";
         const string password = "wang";
-        const string method = "demo_method";
+        //const string method = "demo_method";
+        const string method = "method_name";
+        const string appName = "rpc";
 
         public Worker(ILogger<Worker> logger)
         {
@@ -71,7 +74,7 @@ namespace RpcClientSample
 
             await _mqttClient.ConnectAsync(_options, cancellationToken);
 
-            _mqttRpcClient = new MqttRpcClient(_mqttClient, _mqttRpcClientOptions);
+            //_mqttRpcClient = new MqttRpcClient(_mqttClient, _mqttRpcClientOptions);
 
             await base.StartAsync(cancellationToken);
         }
@@ -80,18 +83,40 @@ namespace RpcClientSample
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                string request = $"{Environment.ProcessId} {Guid.NewGuid()} {DateTime.Now}";
-                Console.WriteLine($"\n\n发送请求: {request}\n\n");
-                byte[] response = await _mqttRpcClient.ExecuteAsync(method, Encoding.UTF8.GetBytes(""), MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce, stoppingToken);
-                Console.WriteLine($"\n\n收到响应: {Encoding.UTF8.GetString(response)}\n\n");
-                await Task.Delay(5000, stoppingToken);
-                //await Task.Delay(999999, stoppingToken);
+                try
+                {
+                    #region
+                    //string request = $"{Environment.ProcessId} {Guid.NewGuid()} {DateTime.Now}";
+                    //Console.WriteLine($"\n\n发送请求: {request}\n\n");
+                    //byte[] response = await _mqttRpcClient.ExecuteAsync(method, Encoding.UTF8.GetBytes(""), MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce, stoppingToken);
+
+                    //byte[] response = await _mqttRpcClient.ExecuteAsync(TimeSpan.FromHours(1), method, Encoding.UTF8.GetBytes(request), MqttQualityOfServiceLevel.ExactlyOnce);
+                    //byte[] response = await _mqttRpcClient.ExecuteAsync(TimeSpan.FromSeconds(5), method, Encoding.UTF8.GetBytes(request), MqttQualityOfServiceLevel.ExactlyOnce);
+                    //byte[] response = await _mqttRpcClient.ExecuteAsync(TimeSpan.FromSeconds(100), method, request, MqttQualityOfServiceLevel.ExactlyOnce);
+                    //Console.WriteLine($"\n\n收到响应: {Encoding.UTF8.GetString(response)}\n\n"); 
+                    #endregion
+
+                    using (IMqttRpcClient rpcClient = new MqttRpcClient(_mqttClient, _mqttRpcClientOptions))
+                    {
+                        string request = $"{Environment.ProcessId} {Guid.NewGuid()} {DateTime.Now}";
+                        Console.WriteLine($"\n\n发送请求: {request}\n\n");
+                        byte[] response = await rpcClient.ExecuteAsync(TimeSpan.FromSeconds(100), method, request, MqttQualityOfServiceLevel.ExactlyOnce);
+                        Console.WriteLine($"\n\n收到响应: {Encoding.UTF8.GetString(response)}\n\n");
+                    }
+
+                    //await Task.Delay(5000, stoppingToken);
+                    //await Task.Delay(999999, stoppingToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, ex.Message);
+                }
             }
         }
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
-            _mqttRpcClient?.Dispose();
+            //_mqttRpcClient?.Dispose();
             await _mqttClient?.DisconnectAsync(cancellationToken);
             _mqttClient?.Dispose();
 
@@ -103,10 +128,15 @@ namespace RpcClientSample
             public MqttRpcTopicPair CreateRpcTopics(TopicGenerationContext context)
             {
                 Console.WriteLine($"Method: {context.MethodName}");
-                return new MqttRpcTopicPair 
+                //return new MqttRpcTopicPair
+                //{
+                //    RequestTopic = string.Format(requestTopic, context.MethodName),
+                //    ResponseTopic = string.Format(responseTopic, context.MethodName)
+                //};
+                return new MqttRpcTopicPair
                 {
-                    RequestTopic = string.Format(requestTopic, context.MethodName),
-                    ResponseTopic = string.Format(responseTopic, context.MethodName)
+                    RequestTopic = $"MQTTnet.RPC/{appName}/{context.MethodName}",
+                    ResponseTopic = $"MQTTnet.RPC/{appName}/{context.MethodName}/response"
                 };
             }
         }

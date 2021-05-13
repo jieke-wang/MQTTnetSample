@@ -22,3 +22,5 @@ MQTT简单示例
 > https://blog.csdn.net/yaojiawan/article/details/101282825
 
 > https://github.com/chkr1011/MQTTnet/issues/72
+>
+> https://github.com/chkr1011/MQTTnet/blob/master/Tests/MQTTnet.Core.Tests/RPC_Tests.cs
