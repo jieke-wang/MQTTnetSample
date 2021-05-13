@@ -81,6 +81,7 @@ namespace RpcClientSample
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            using IMqttRpcClient rpcClient = new MqttRpcClient(_mqttClient, _mqttRpcClientOptions);
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
@@ -97,16 +98,17 @@ namespace RpcClientSample
                     #endregion
 
                     DateTime startTime = DateTime.Now;
-                    using (IMqttRpcClient rpcClient = new MqttRpcClient(_mqttClient, _mqttRpcClientOptions))
-                    {
-                        string request = $"{Environment.ProcessId} {Guid.NewGuid()} {DateTime.Now}";
-                        _logger.LogInformation($"\n\n发送请求: {request}\n\n");
-                        byte[] response = await rpcClient.ExecuteAsync(TimeSpan.FromSeconds(100), method, request, MqttQualityOfServiceLevel.ExactlyOnce);
-                        _logger.LogInformation($"\n\n收到响应: {Encoding.UTF8.GetString(response)}\n\n");
-                    }
+                    //await Task.WhenAll(RemoteProcedureCallAsync(), RemoteProcedureCallAsync(), RemoteProcedureCallAsync()); // 一个mqtt客户端不能开启多个rpc客户端,否者会有问题(回调函数)
+                    await Task.WhenAll(
+                        RemoteProcedureCallAsync(rpcClient), 
+                        RemoteProcedureCallAsync(rpcClient),
+                        RemoteProcedureCallAsync(rpcClient),
+                        RemoteProcedureCallAsync(rpcClient),
+                        RemoteProcedureCallAsync(rpcClient),
+                        RemoteProcedureCallAsync(rpcClient));
                     _logger.LogInformation($"耗时: {DateTime.Now - startTime}");
 
-                    //await Task.Delay(1000, stoppingToken);
+                    await Task.Delay(1000, stoppingToken);
                     //await Task.Delay(5000, stoppingToken);
                     //await Task.Delay(999999, stoppingToken);
                 }
@@ -115,6 +117,29 @@ namespace RpcClientSample
                     _logger.LogError(ex, ex.Message);
                 }
             }
+        }
+
+        private async Task RemoteProcedureCallAsync()
+        {
+            using (IMqttRpcClient rpcClient = new MqttRpcClient(_mqttClient, _mqttRpcClientOptions))
+            {
+                #region
+                //string request = $"{Environment.ProcessId} {Guid.NewGuid()} {DateTime.Now}";
+                //_logger.LogInformation($"\n\n发送请求: {request}\n\n");
+                //byte[] response = await rpcClient.ExecuteAsync(TimeSpan.FromSeconds(100), method, request, MqttQualityOfServiceLevel.ExactlyOnce);
+                //_logger.LogInformation($"\n\n收到响应: {Encoding.UTF8.GetString(response)}\n\n"); 
+                #endregion
+
+                await Task.WhenAll(RemoteProcedureCallAsync(rpcClient), RemoteProcedureCallAsync(rpcClient), RemoteProcedureCallAsync(rpcClient));
+            }
+        }
+
+        private async Task RemoteProcedureCallAsync(IMqttRpcClient rpcClient)
+        {
+            string request = $"{Thread.CurrentThread.ManagedThreadId} {Environment.ProcessId} {Guid.NewGuid()} {DateTime.Now}";
+            _logger.LogInformation($"\n\n发送请求: {request}\n\n");
+            byte[] response = await rpcClient.ExecuteAsync(TimeSpan.FromSeconds(100), method, request, MqttQualityOfServiceLevel.ExactlyOnce);
+            _logger.LogInformation($"\n\n收到响应: {Encoding.UTF8.GetString(response)}\n\n");
         }
 
         public override async Task StopAsync(CancellationToken cancellationToken)
@@ -130,7 +155,7 @@ namespace RpcClientSample
         {
             public MqttRpcTopicPair CreateRpcTopics(TopicGenerationContext context)
             {
-                Console.WriteLine($"Method: {context.MethodName}");
+                //Console.WriteLine($"Method: {context.MethodName}");
                 //return new MqttRpcTopicPair
                 //{
                 //    RequestTopic = string.Format(requestTopic, context.MethodName),

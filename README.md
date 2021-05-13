@@ -26,6 +26,9 @@ MQTT简单示例
 > https://github.com/chkr1011/MQTTnet/blob/master/Tests/MQTTnet.Core.Tests/RPC_Tests.cs
 >
 > https://github.com/chkr1011/MQTTnet/blob/master/Source/MQTTnet.Extensions.Rpc/MqttRpcClient.cs
+>
+> https://github.com/chkr1011/MQTTnet/blob/master/Source/MQTTnet.Extensions.WebSocket4Net/WebSocket4NetMqttChannel.cs
+>
 
 ```csharp
 // 构建结果通知结合, key为通知标识, value为结果容器
