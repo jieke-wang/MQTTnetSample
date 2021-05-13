@@ -24,3 +24,33 @@ MQTT简单示例
 > https://github.com/chkr1011/MQTTnet/issues/72
 >
 > https://github.com/chkr1011/MQTTnet/blob/master/Tests/MQTTnet.Core.Tests/RPC_Tests.cs
+>
+> https://github.com/chkr1011/MQTTnet/blob/master/Source/MQTTnet.Extensions.Rpc/MqttRpcClient.cs
+
+```csharp
+// 构建结果通知结合, key为通知标识, value为结果容器
+ConcurrentDictionary<string, TaskCompletionSource<byte[]>> _waitingCalls = new ConcurrentDictionary<string, TaskCompletionSource<byte[]>>();
+
+string topic = "xxxxxx";
+try
+{
+    // 构建存储结果的容器
+    var promise = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
+    // 将容器添加到通知集合中
+    _waitingCalls.TryAdd(topic, promise);
+
+    // 应用超时取消机制
+    using (cancellationToken.Register(() => { promise.TrySetCanceled(); }))
+    {	// 异步等待结果
+        return await promise.Task.ConfigureAwait(false);
+    }
+}
+finall
+{	// 从通知集合中移除
+    _waitingCalls.TryRemove(topic, out _);
+}
+
+// 异步设置结果
+promise.TrySetResult(eventArgs.ApplicationMessage.Payload);
+```
+
