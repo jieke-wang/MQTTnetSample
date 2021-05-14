@@ -19,7 +19,10 @@ using Microsoft.OpenApi.Models;
 using MQTTnet;
 using MQTTnet.AspNetCore;
 using MQTTnet.AspNetCore.Extensions;
+using MQTTnet.Protocol;
 using MQTTnet.Server;
+
+using WebApiSample.Libs;
 
 namespace WebApiSample
 {
@@ -36,9 +39,40 @@ namespace WebApiSample
         public void ConfigureServices(IServiceCollection services)
         {
             services
-                .AddHostedMqttServer(options => options.WithoutDefaultEndpoint())
+                .AddHostedMqttServer(options => options
+                    .WithoutDefaultEndpoint()
+                    .WithConnectionValidator(context =>
+                    {
+                        if (context.ClientId?.Length < 10)
+                        {
+                            context.ReasonCode = MqttConnectReasonCode.ClientIdentifierNotValid;
+                            return;
+                        }
+
+                        if (context.ClientId.StartsWith("browser-", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (context.Username != "browser" || context.Password != "password")
+                            {
+                                context.ReasonCode = MqttConnectReasonCode.NotAuthorized;
+                                return;
+                            }
+                        }
+                        else if (context.Username != "jieke" || context.Password != "wang")
+                        {
+                            context.ReasonCode = MqttConnectReasonCode.NotAuthorized;
+                            return;
+                        }
+
+                        context.ReasonCode = MqttConnectReasonCode.Success;
+                    }))
                 .AddMqttConnectionHandler()
-                .AddConnections();
+                .AddConnections(options =>
+                {
+                    options.DisconnectTimeout = TimeSpan.FromMinutes(5);
+                });
+
+            services.AddSingleton<MqttSender>();
+            services.AddHostedService<InitWorker>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -50,6 +84,7 @@ namespace WebApiSample
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -106,9 +141,16 @@ namespace WebApiSample
                     Console.WriteLine($"\n\n{arg.ClientId} 已断开, 断开类型: {arg.DisconnectType}\n\n");
                 });
 
-                server.ClientSubscribedTopicHandler = new MqttServerClientSubscribedHandlerDelegate(arg =>
+                server.ClientSubscribedTopicHandler = new MqttServerClientSubscribedHandlerDelegate(async arg =>
                 {
-                    Console.WriteLine($"[{arg.ClientId}] 订阅: {string.Join(", ", arg.TopicFilter.Topic)}");
+                    if (arg.ClientId?.StartsWith("browser-", StringComparison.OrdinalIgnoreCase) == true &&
+                        arg.TopicFilter?.Topic?.StartsWith("browser/", StringComparison.OrdinalIgnoreCase) == false)
+                    {
+                        await server.UnsubscribeAsync(arg.ClientId, arg.TopicFilter.Topic);
+                        Console.WriteLine($"拒绝非法连接 [{arg.ClientId}] 订阅: {arg.TopicFilter.Topic}");
+                        return;
+                    }
+                    Console.WriteLine($"[{arg.ClientId}] 订阅: {arg.TopicFilter.Topic}");
                 });
 
                 server.ClientUnsubscribedTopicHandler = new MqttServerClientUnsubscribedTopicHandlerDelegate(arg =>

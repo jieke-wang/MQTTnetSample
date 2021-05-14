@@ -2,7 +2,11 @@ import { connect } from "mqtt";
 
 var client = connect('ws://' + location.host + '/mqtt',
     {
-        clientId: "client" + Math.floor(Math.random() * 6) + 1
+        //clientId: "client" + Math.floor(Math.random() * 6) + 1
+        clientId: `browser-${guid()}`,
+        username: 'browser',
+        password: 'password',
+        clean: true
     });
 
 window.onbeforeunload = () => {
@@ -22,10 +26,10 @@ publishButton.onclick = click => {
 };
 
 client.on('connect', () => {
-    client.subscribe('#', { qos: 0 }, (err, granted) => {
+    client.subscribe('browser/#', { qos: 0 }, (err, granted) => {
         console.log(err);
     });
-    client.publish('presence', 'Hello mqtt');
+    //client.publish('presence', 'Hello mqtt');
 
     stateParagraph.innerText = "connected";
     showMsg("[connect]");
@@ -55,4 +59,14 @@ function showMsg(msg: string) {
     if (msgsList.childElementCount > 50) {
         msgsList.removeChild(msgsList.childNodes[0]);
     }
+}
+
+/**
+ *获取id
+ */
+function guid() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 }

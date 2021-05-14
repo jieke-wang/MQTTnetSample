@@ -2,7 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var mqtt_1 = require("mqtt");
 var client = mqtt_1.connect('ws://' + location.host + '/mqtt', {
-    clientId: "client" + Math.floor(Math.random() * 6) + 1
+    //clientId: "client" + Math.floor(Math.random() * 6) + 1
+    clientId: "browser-" + guid(),
+    username: 'browser',
+    password: 'password',
+    clean: true
 });
 window.onbeforeunload = function () {
     client.end();
@@ -18,10 +22,10 @@ publishButton.onclick = function (click) {
     client.publish(topic, msg);
 };
 client.on('connect', function () {
-    client.subscribe('#', { qos: 0 }, function (err, granted) {
+    client.subscribe('browser/#', { qos: 0 }, function (err, granted) {
         console.log(err);
     });
-    client.publish('presence', 'Hello mqtt');
+    //client.publish('presence', 'Hello mqtt');
     stateParagraph.innerText = "connected";
     showMsg("[connect]");
 });
@@ -43,5 +47,14 @@ function showMsg(msg) {
     if (msgsList.childElementCount > 50) {
         msgsList.removeChild(msgsList.childNodes[0]);
     }
+}
+/**
+ *获取id
+ */
+function guid() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 }
 //# sourceMappingURL=app.js.map

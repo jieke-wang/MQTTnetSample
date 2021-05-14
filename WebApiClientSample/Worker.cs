@@ -25,14 +25,16 @@ namespace WebApiClientSample
         private IMqttClient _mqttClient;
         private readonly MqttTopicFilter _mqttTopicFilter;
 
-        const string Topic = "csharp_topic";
+        const string Topic = "browser/csharp_topic";
+        const string username = "jieke";
+        const string password = "wang";
 
         public Worker(ILogger<Worker> logger)
         {
             _logger = logger;
             _options = new MqttClientOptionsBuilder()
                 .WithClientId(Guid.NewGuid().ToString())
-                //.WithCredentials(username, password)
+                .WithCredentials(username, password)
                 .WithCleanSession()
                 .WithTcpServer(options =>
                 {
